@@ -1,0 +1,160 @@
+Imports System.Linq
+Imports System.Data.SqlClient
+Imports System.Data.OleDb
+Imports Microsoft.Office.Core
+Imports Excel = Microsoft.Office.Interop.Excel
+Imports ExcelAutoFormat = Microsoft.Office.Interop.Excel.XlRangeAutoFormat
+Imports Microsoft.Office.Interop
+Imports System.IO
+Imports System.Xml.XPath
+Imports System.Data
+Imports System.Xml
+
+Public Class frmdatabase
+    Dim drag As Boolean
+    Dim mousex As Integer
+    Dim mousey As Integer
+    Dim y, z As Integer
+    Private Sub Form2_MouseDown(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles Me.MouseDown
+        If e.Button = Windows.Forms.MouseButtons.Left Then
+            drag = True
+            mousex = Windows.Forms.Cursor.Position.X - Me.Left
+            mousey = Windows.Forms.Cursor.Position.Y - Me.Top
+        End If
+    End Sub
+    Private Sub Form2_MouseMove(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles Me.MouseMove
+        If drag Then
+            Me.Top = Windows.Forms.Cursor.Position.Y - mousey
+            Me.Left = Windows.Forms.Cursor.Position.X - mousex
+        End If
+    End Sub
+    Private Sub Form2_MouseUp(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles Me.MouseUp
+        drag = False
+    End Sub
+    Private Sub btnissue_Click(sender As Object, e As EventArgs) Handles btnissue.Click
+        Me.Hide()
+        frmissue.Show()
+
+    End Sub
+
+    Private Sub btnreturn_Click(sender As Object, e As EventArgs) Handles btnreturn.Click
+        Me.Hide()
+        frmreturn.Show()
+
+    End Sub
+
+    Private Sub btnbooks_Click(sender As Object, e As EventArgs) Handles btnbooks.Click
+        Me.Hide()
+        frmbook.Show()
+
+    End Sub
+
+    Private Sub btnusers_Click(sender As Object, e As EventArgs) Handles btnusers.Click
+        Me.Hide()
+        frmuser.Show()
+
+    End Sub
+
+    Private Sub btnlogout_Click(sender As Object, e As EventArgs) Handles btnlogout.Click
+        Me.Hide()
+        frmlogin.Show()
+    End Sub
+
+    Private Sub btnexit_Click(sender As Object, e As EventArgs) Handles btnexit.Click
+        Me.Close()
+
+    End Sub
+
+    Private Sub btndatabase_Click(sender As Object, e As EventArgs) Handles btndatabase.Click
+        Me.Show()
+    End Sub
+
+    Private Sub frmdatabase_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        'TODO: This line of code loads data into the 'FinaldbDataSet.OrderHistory' table. You can move, or remove it, as needed.
+        Me.OrderHistoryTableAdapter.Fill(Me.FinaldbDataSet.OrderHistory)
+        ComboBox1.Items.Add("Order ID")
+        ComboBox1.Items.Add("BookID")
+        ComboBox1.Items.Add("BookTitle")
+        ComboBox1.Items.Add("Author")
+        ComboBox1.Items.Add("User ID")
+        ComboBox1.Items.Add("User Name")
+        TextBox3.Text = OrderHistoryDataGridView.RowCount - 1
+        TextBox2.Text = 1
+
+    End Sub
+
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+        Dim Library As String
+        Library = ComboBox1.Text
+        Select Case Library
+            Case "BookID"
+                Me.OrderHistoryBindingSource.Filter = "Bookid = '" & TextBox1.Text & "'"
+            Case "BookTitle"
+                Me.OrderHistoryBindingSource.Filter = "Book Name = '" & TextBox1.Text & "'"
+            Case "Author"
+                Me.OrderHistoryBindingSource.Filter = "Author = '" & TextBox1.Text & "'"
+            Case "Order ID"
+                Me.OrderHistoryBindingSource.Filter = "OrderID = '" & TextBox1.Text & "'"
+            Case "User ID"
+                Me.OrderHistoryBindingSource.Filter = "Custid = '" & TextBox1.Text & "'"
+            Case "User Name"
+                Me.OrderHistoryBindingSource.Filter = "Username = '" & TextBox1.Text & "'"
+        End Select
+
+    End Sub
+
+    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
+        Me.OrderHistoryBindingSource.RemoveFilter()
+    End Sub
+
+    Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
+        Dim xlApp As Microsoft.Office.Interop.Excel.Application
+        Dim xlWorkBook As Microsoft.Office.Interop.Excel.Workbook
+        Dim xlWorkSheet As Microsoft.Office.Interop.Excel.Worksheet
+        Dim misValue As Object = System.Reflection.Missing.Value
+        Dim i As Integer
+        Dim j As Integer
+        Dim y, z As Integer
+        y = Val(TextBox2.Text)
+        z = Val(TextBox3.Text)
+        xlApp = New Microsoft.Office.Interop.Excel.Application
+        xlWorkBook = xlApp.Workbooks.Add(misValue)
+        xlWorkSheet = xlWorkBook.Sheets("sheet1")
+
+
+        For i = y - 1 To z - 1
+            For j = 0 To OrderHistoryDataGridView.ColumnCount - 1
+                For k As Integer = 1 To OrderHistoryDataGridView.Columns.Count
+                    xlWorkSheet.Cells(1, k) = OrderHistoryDataGridView.Columns(k - 1).HeaderText
+                    xlWorkSheet.Cells(i + 2, j + 1) = OrderHistoryDataGridView(j, i).Value.ToString()
+                Next
+            Next
+        Next
+
+        xlWorkSheet.SaveAs("D:\Order History from " & y & " to " & z & ".xlsx")
+        xlWorkBook.Close()
+        xlApp.Quit()
+
+        releaseObject(xlApp)
+        releaseObject(xlWorkBook)
+        releaseObject(xlWorkSheet)
+
+        MsgBox("You can find the file D:\Order History from " & y & " to " & z & ".xlsx")
+    End Sub
+
+    Private Sub releaseObject(ByVal obj As Object)
+        Try
+            System.Runtime.InteropServices.Marshal.ReleaseComObject(obj)
+            obj = Nothing
+        Catch ex As Exception
+            obj = Nothing
+        Finally
+            GC.Collect()
+        End Try
+
+    End Sub
+
+
+
+
+End Class

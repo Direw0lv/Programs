@@ -1,0 +1,129 @@
+Public Class frmissue
+    Dim drag As Boolean
+    Dim mousex As Integer
+    Dim mousey As Integer
+    Dim x, y, bookloan As Integer
+    Private Sub Form2_MouseDown(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles Me.MouseDown
+        If e.Button = Windows.Forms.MouseButtons.Left Then
+            drag = True
+            mousex = Windows.Forms.Cursor.Position.X - Me.Left
+            mousey = Windows.Forms.Cursor.Position.Y - Me.Top
+        End If
+    End Sub
+    Private Sub Form2_MouseMove(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles Me.MouseMove
+        If drag Then
+            Me.Top = Windows.Forms.Cursor.Position.Y - mousey
+            Me.Left = Windows.Forms.Cursor.Position.X - mousex
+        End If
+    End Sub
+    Private Sub Form2_MouseUp(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles Me.MouseUp
+        drag = False
+    End Sub
+
+    Private Sub OrderBindingNavigatorSaveItem_Click(sender As Object, e As EventArgs) Handles OrderBindingNavigatorSaveItem.Click
+        Me.Validate()
+        Me.OrderBindingSource.EndEdit()
+        Me.TableAdapterManager.UpdateAll(Me.FinaldbDataSet)
+
+    End Sub
+
+    Private Sub Form1_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        'TODO: This line of code loads data into the 'FinaldbDataSet.User' table. You can move, or remove it, as needed.
+        Me.UserTableAdapter.Fill(Me.FinaldbDataSet.User)
+        'TODO: This line of code loads data into the 'FinaldbDataSet.Books' table. You can move, or remove it, as needed.
+        Me.BooksTableAdapter.Fill(Me.FinaldbDataSet.Books)
+        'TODO: This line of code loads data into the 'FinaldbDataSet.Order' table. You can move, or remove it, as needed.
+        Me.OrderTableAdapter.Fill(Me.FinaldbDataSet.Order)
+        Me.OrderBindingSource.MoveLast()
+    End Sub
+
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+        BookidTextBox.Text = IDListBox.Text
+        CustidTextBox.Text = UserIdListBox.Text
+
+
+    End Sub
+
+    Private Sub btnissue_Click(sender As Object, e As EventArgs) Handles btnissue.Click
+        Me.Show()
+
+    End Sub
+
+    Private Sub btnreturn_Click(sender As Object, e As EventArgs) Handles btnreturn.Click
+        Me.Hide()
+        frmreturn.Show()
+
+    End Sub
+
+    Private Sub btnbooks_Click(sender As Object, e As EventArgs) Handles btnbooks.Click
+        Me.Hide()
+        frmbook.Show()
+    End Sub
+
+    Private Sub btnusers_Click(sender As Object, e As EventArgs) Handles btnusers.Click
+        Me.Hide()
+        frmuser.Show()
+    End Sub
+
+    Private Sub btnlogout_Click(sender As Object, e As EventArgs) Handles btnlogout.Click
+        Me.Hide()
+        frmlogin.Show()
+
+    End Sub
+
+    Private Sub btnexit_Click(sender As Object, e As EventArgs) Handles btnexit.Click
+        Me.Close()
+
+
+    End Sub
+
+    Private Sub btndatabase_Click(sender As Object, e As EventArgs) Handles btndatabase.Click
+        Me.Hide()
+        frmdatabase.Show()
+    End Sub
+
+    Private Sub Button5_Click(sender As Object, e As EventArgs) Handles Button5.Click
+        Dim id As Integer
+        id = UserBindingSource.Find("UserId", TextBox1.Text)
+        UserBindingSource.Position = id
+    End Sub
+
+    Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
+        Dim id As Integer
+        id = BooksBindingSource.Find("ID", TextBox2.Text)
+        BooksBindingSource.Position = id
+    End Sub
+
+    Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
+        Dim bookduedate As Date
+        y = Val(StockTextBox.Text)
+        Select Case y
+            Case 0
+                bookloan = 0
+            Case 1 To 5
+                bookloan = 5
+            Case 6 To 10
+                bookloan = 10
+            Case 11 To 15
+                bookloan = 15
+            Case 16 To 20
+                bookloan = 20
+            Case 21 To 25
+                bookloan = 25
+            Case 26 To 30
+                bookloan = 30
+            Case Else
+                bookloan = 30
+        End Select
+        bookduedate = Today.AddDays(bookloan)
+        Due_DateDateTimePicker.Text = Format(bookduedate, "dddd dd MMMM yyyy")
+    End Sub
+
+    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
+
+        x = OrderIDTextBox.Text
+        Me.OrderBindingSource.AddNew()
+        OrderIDTextBox.Text = x + 1
+        OrderdateDateTimePicker.Text = Today
+    End Sub
+End Class

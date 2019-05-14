@@ -1,0 +1,179 @@
+Imports System.Linq
+Imports System.Data.SqlClient
+Imports System.Data.OleDb
+Imports Microsoft.Office.Core
+Imports Excel = Microsoft.Office.Interop.Excel
+Imports ExcelAutoFormat = Microsoft.Office.Interop.Excel.XlRangeAutoFormat
+Imports Microsoft.Office.Interop
+Imports System.IO
+Imports System.Xml.XPath
+Imports System.Data
+Imports System.Xml
+Public Class frmbook
+    Dim drag As Boolean
+    Dim mousex As Integer
+    Dim mousey As Integer
+    Private Sub Book_MouseDown(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles Me.MouseDown
+        If e.Button = Windows.Forms.MouseButtons.Left Then
+            drag = True
+            mousex = Windows.Forms.Cursor.Position.X - Me.Left
+            mousey = Windows.Forms.Cursor.Position.Y - Me.Top
+        End If
+    End Sub
+    Private Sub Book_MouseMove(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles Me.MouseMove
+        If drag Then
+            Me.Top = Windows.Forms.Cursor.Position.Y - mousey
+            Me.Left = Windows.Forms.Cursor.Position.X - mousex
+        End If
+    End Sub
+    Private Sub Book_MouseUp(ByVal sender As Object, ByVal e As System.Windows.Forms.MouseEventArgs) Handles Me.MouseUp
+        drag = False
+    End Sub
+    Private Sub BooksBindingNavigatorSaveItem_Click(sender As Object, e As EventArgs)
+        Me.Validate()
+        Me.BooksBindingSource.EndEdit()
+        Me.TableAdapterManager.UpdateAll(Me.FinaldbDataSet1)
+
+    End Sub
+
+    Private Sub Form2_Load(sender As Object, e As EventArgs) Handles MyBase.Load
+        'TODO: This line of code loads data into the 'FinaldbDataSet.Order' table. You can move, or remove it, as needed.
+        Me.OrderTableAdapter.Fill(Me.FinaldbDataSet.Order)
+        'TODO: This line of code loads data into the 'FinaldbDataSet.Books' table. You can move, or remove it, as needed.
+        Me.BooksTableAdapter1.Fill(Me.FinaldbDataSet.Books)
+        TextBox3.Text = BooksDataGridView.RowCount - 1
+        TextBox4.Text = 1
+        GenreComboBox.Items.Add("Non Fiction")
+        GenreComboBox.Items.Add("Fiction")
+        GenreComboBox.Items.Add("Economics")
+        GenreComboBox.Items.Add("Commerce")
+        GenreComboBox.Items.Add("Astronomy")
+        GenreComboBox.Items.Add("Computer Science")
+        GenreComboBox.Items.Add("English Literature")
+        GenreComboBox.Items.Add("Mathematics")
+        GenreComboBox.Items.Add("Physics")
+        GenreComboBox.Items.Add("Chemistry")
+        GenreComboBox.Items.Add("Romantic")
+        GenreComboBox.Items.Add("Historical Fiction")
+        GenreComboBox.Items.Add("Phylosophical")
+        GenreComboBox.Items.Add("Psychology")
+        GenreComboBox.Items.Add("Christian Literature")
+        GenreComboBox.Items.Add("Science Fiction")
+        GenreComboBox.Items.Add("Astrology")
+        GenreComboBox.Items.Add("Misc.")
+    End Sub
+
+    Private Sub btnexit_Click(sender As Object, e As EventArgs) Handles btnexit.Click
+        Me.Close()
+
+    End Sub
+
+    Private Sub btnissue_Click(sender As Object, e As EventArgs) Handles btnissue.Click
+        Me.Hide()
+        frmissue.Show()
+
+    End Sub
+
+    Private Sub btnreturn_Click(sender As Object, e As EventArgs) Handles btnreturn.Click
+        Me.Hide()
+        frmreturn.Show()
+
+    End Sub
+
+    Private Sub btnbooks_Click(sender As Object, e As EventArgs) Handles btnbooks.Click
+        Me.Show()
+
+    End Sub
+
+    Private Sub btnusers_Click(sender As Object, e As EventArgs) Handles btnusers.Click
+        Me.Hide()
+        frmuser.Show()
+
+    End Sub
+
+    Private Sub btnlogout_Click(sender As Object, e As EventArgs) Handles btnlogout.Click
+        Me.Hide()
+        frmlogin.Show()
+    End Sub
+
+    Private Sub btndatabase_Click(sender As Object, e As EventArgs) Handles btndatabase.Click
+        Me.Hide()
+        frmdatabase.Show()
+    End Sub
+
+
+
+    Private Sub BooksBindingNavigatorSaveItem_Click_2(sender As Object, e As EventArgs) Handles BooksBindingNavigatorSaveItem.Click
+        Me.Validate()
+        Me.BooksBindingSource.EndEdit()
+        Me.TableAdapterManager1.UpdateAll(Me.FinaldbDataSet)
+
+    End Sub
+
+    Private Sub Button1_Click(sender As Object, e As EventArgs) Handles Button1.Click
+        Dim id As Integer
+        id = BooksBindingSource.Find("Book Name", TextBox1.Text)
+        BooksBindingSource.Position = id
+    End Sub
+
+    Private Sub Button2_Click(sender As Object, e As EventArgs) Handles Button2.Click
+        Dim id As Integer
+        id = BooksBindingSource.Find("ID", TextBox2.Text)
+        BooksBindingSource.Position = id
+    End Sub
+
+    Private Sub Button3_Click(sender As Object, e As EventArgs) Handles Button3.Click
+        Dim xlApp As Microsoft.Office.Interop.Excel.Application
+        Dim xlWorkBook As Microsoft.Office.Interop.Excel.Workbook
+        Dim xlWorkSheet As Microsoft.Office.Interop.Excel.Worksheet
+        Dim misValue As Object = System.Reflection.Missing.Value
+        Dim i As Integer
+        Dim j As Integer
+        Dim y, z As Integer
+        y = Val(TextBox4.Text)
+        z = Val(TextBox3.Text)
+        xlApp = New Microsoft.Office.Interop.Excel.Application
+        xlWorkBook = xlApp.Workbooks.Add(misValue)
+        xlWorkSheet = xlWorkBook.Sheets("sheet1")
+
+
+        For i = y - 1 To z - 1
+            For j = 0 To BooksDataGridView.ColumnCount - 1
+                For k As Integer = 1 To BooksDataGridView.Columns.Count
+                    xlWorkSheet.Cells(1, k) = BooksDataGridView.Columns(k - 1).HeaderText
+                    xlWorkSheet.Cells(i + 2, j + 1) = BooksDataGridView(j, i).Value.ToString()
+                Next
+            Next
+        Next
+
+        xlWorkSheet.SaveAs("D:\Books from " & y & " to " & z & ".xlsx")
+        xlWorkBook.Close()
+        xlApp.Quit()
+
+        releaseObject(xlApp)
+        releaseObject(xlWorkBook)
+        releaseObject(xlWorkSheet)
+
+        MsgBox("You can find the file D:\Books from " & y & " to " & z & ".xlsx")
+    End Sub
+
+    Private Sub releaseObject(ByVal obj As Object)
+        Try
+            System.Runtime.InteropServices.Marshal.ReleaseComObject(obj)
+            obj = Nothing
+        Catch ex As Exception
+            obj = Nothing
+        Finally
+            GC.Collect()
+        End Try
+
+    End Sub
+
+    Private Sub Button4_Click(sender As Object, e As EventArgs) Handles Button4.Click
+        Dim f As Integer
+        BooksBindingSource.MoveLast()
+        f = Val(IDTextBox.Text)
+        BooksBindingSource.AddNew()
+        IDTextBox.Text = f + 1
+    End Sub
+End Class
